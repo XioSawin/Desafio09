@@ -4,12 +4,15 @@ const app = express();
 const router = express.Router();
 
 app.use(express.json());
+app.use(express.urlencoded({extended:true}));
+app.use('/api/producto', router);
+app.use(express.static(__dirname + 'public'));
 
 let productos: any[] = []; //inicializado como array vacio, no sabemos qué va a ir adentro.
 
 router.get('/', (req, res) => {
 
-    if(!productos.length){ 
+    if(productos.length===0){ 
         res.json({error: 'no hay productos cargados'});
     }
 
@@ -17,7 +20,7 @@ router.get('/', (req, res) => {
 })
 
 router.get('/addproduct', (req, res)=>{
-    res.sendFile(__dirname + '/addproduct.html');
+    res.sendFile(__dirname+'/public/addproduct.html');
 })
 
 router.post('/', (req, res) => {
@@ -37,7 +40,7 @@ router.post('/', (req, res) => {
 })
 
 router.get('/:id', (req, res)=>{ //get info by id
-    const id = req.params.id;
+    const { id } = req.params;
 
     const producto = productos.find(producto => producto.id == id);
 
@@ -48,9 +51,9 @@ router.get('/:id', (req, res)=>{ //get info by id
     res.json(producto);
 })
 
-router.patch('/actualizar/:id', (req, res) => {
+router.patch('/:id', (req, res) => {
 
-    const id = req.params.id;
+    const { id } = req.params;
 
     const producto = productos.find(producto => producto.id == id);
 
@@ -67,8 +70,8 @@ router.patch('/actualizar/:id', (req, res) => {
     res.sendStatus(204);
 })
 
-router.delete('/borrar/:id', (req, res) => {
-    const id = req.params.id;
+router.delete('/:id', (req, res) => {
+    const { id } = req.params;
 
     const producto = productos.find(producto => producto.id == id);
 
@@ -76,11 +79,8 @@ router.delete('/borrar/:id', (req, res) => {
         res.sendStatus(404);
     }
 
-    productos = productos.filter(producto => producto.id != id)
+    productos = productos.filter((producto) => producto.id != id)
 })
-
-app.use('/api/producto', router);
-app.use(express.static('public'));
 
 app.listen(8080, () => {
     console.log("I´m driving driving on port 8080");
